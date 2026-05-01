@@ -43,13 +43,6 @@ class MossVectorStore(VectorStoreBase):
     Moss metadata values must be strings (``Dict[str, str]``).  The full mem0
     payload is serialised to JSON and stored under the ``_payload`` metadata
     key so that all fields and types are round-tripped faithfully.
-
-    Metadata filtering
-    ------------------
-    Moss metadata filters only work on a *locally loaded* index
-    (``load_index()``).  This provider auto-loads the index the first time a
-    filtered query is issued.  Set ``load_index_on_init=True`` in config to
-    pre-load eagerly.
     """
 
     def __init__(
@@ -58,9 +51,7 @@ class MossVectorStore(VectorStoreBase):
         project_id: str,
         project_key: str,
         model_id: str = "moss-minilm",
-        embedding_model_dims: Optional[int] = None,  # unused — Moss manages its own embeddings
         alpha: float = 0.8,
-        load_index_on_init: bool = False,
     ):
         from moss import MossClient  # noqa: PLC0415
 
@@ -72,12 +63,8 @@ class MossVectorStore(VectorStoreBase):
         self._index_loaded = False
 
         self.create_col()
-        if load_index_on_init:
-            self._load_index()
+        self._load_index()
 
-    # ------------------------------------------------------------------
-    # Internal helpers
-    # ------------------------------------------------------------------
 
     def _load_index(self):
         """Download the index into memory for fast local queries and filtering."""

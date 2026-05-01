@@ -91,7 +91,6 @@ class TestMossVectorStore(unittest.TestCase):
             project_key="key_abc",
             model_id="moss-minilm",
             alpha=0.8,
-            load_index_on_init=False,
         )
 
     # ------------------------------------------------------------------
@@ -334,34 +333,24 @@ class TestMossVectorStore(unittest.TestCase):
         self.assertFalse(self.store._index_loaded)
 
     # ------------------------------------------------------------------
-    # load_index_on_init
+    # eager load on init
     # ------------------------------------------------------------------
 
-    def test_load_index_on_init_loads_when_index_exists(self):
+    def test_init_loads_index_when_index_exists(self):
         client2 = _make_client()
         client2.list_indexes = AsyncMock(return_value=[_make_index("eager")])
         _moss_module.MossClient.return_value = client2
 
-        store = MossVectorStore(
-            collection_name="eager",
-            project_id="p",
-            project_key="k",
-            load_index_on_init=True,
-        )
+        store = MossVectorStore(collection_name="eager", project_id="p", project_key="k")
         client2.load_index.assert_called_once_with("eager")
         self.assertTrue(store._index_loaded)
 
-    def test_load_index_on_init_skipped_when_index_missing(self):
+    def test_init_skips_load_when_index_missing(self):
         client2 = _make_client()
         client2.list_indexes = AsyncMock(return_value=[])
         _moss_module.MossClient.return_value = client2
 
-        store = MossVectorStore(
-            collection_name="newindex",
-            project_id="p",
-            project_key="k",
-            load_index_on_init=True,
-        )
+        store = MossVectorStore(collection_name="newindex", project_id="p", project_key="k")
         client2.load_index.assert_not_called()
         self.assertFalse(store._index_loaded)
 

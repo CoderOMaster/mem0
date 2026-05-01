@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -18,21 +18,11 @@ class MossConfig(BaseModel):
         "moss-minilm",
         description="Embedding model used when creating the index. 'moss-minilm' (fast) or 'moss-mediumlm' (more accurate)",
     )
-    # Unused by Moss (embeddings are managed by Moss internally) but kept for
-    # API parity with other mem0 vector store configs.
-    embedding_model_dims: Optional[int] = Field(None, description="Unused — Moss manages its own embeddings")
     alpha: float = Field(
         0.8,
         description="Hybrid search weight: 1.0 = pure semantic, 0.0 = pure keyword, 0.8 = default",
         ge=0.0,
         le=1.0,
-    )
-    load_index_on_init: bool = Field(
-        False,
-        description=(
-            "Download the index into memory on startup for sub-10 ms queries. "
-            "Required for metadata filtering. Costs ~100-500 ms on first load."
-        ),
     )
 
     @model_validator(mode="before")
